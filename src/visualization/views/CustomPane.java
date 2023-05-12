@@ -29,8 +29,8 @@ public class CustomPane extends BorderPane {
 	
 	
 	//TODO make style sheet file
-	private static final String TF_ERROR_STYLE = "-fx-text-box-border: #FF0000", 
-								CB_ERROR_STYLE = "-fx-background-color: #FF0000";
+	private static final String TF_ERROR_STYLE = "-fx-text-box-border: red", 
+								CB_ERROR_STYLE = "-fx-border-color: red";
 	
 	public CustomPane() {
 		temp.setPrefSize(1000, 500);
@@ -64,7 +64,9 @@ public class CustomPane extends BorderPane {
 				
 				controller.addEdge(edgeStartOptions.getSelectionModel().getSelectedIndex(), 
 									edgeEndOptions.getSelectionModel().getSelectedIndex(),
-									tfEdgeWeight.getText(), edges);
+									tfEdgeWeight.getText(), nodes, edges);
+			} catch(NumberFormatException ex) {
+				tfEdgeWeight.setStyle(TF_ERROR_STYLE);
 			} catch(IllegalArgumentException ex) {
 				if(edgeStartOptions.getSelectionModel().isEmpty())
 					edgeStartOptions.setStyle(CB_ERROR_STYLE);
@@ -72,28 +74,9 @@ public class CustomPane extends BorderPane {
 				if(edgeEndOptions.getSelectionModel().isEmpty())
 					edgeEndOptions.setStyle(CB_ERROR_STYLE);
 				
-//				if(tfEdgeWeight.getText().isBlank() || x)
-//					tfEdgeWeight.setStyle(TF_ERROR_STYLE);
+				if(tfEdgeWeight.getText().isBlank())
+					tfEdgeWeight.setStyle(TF_ERROR_STYLE);
 			}
-			
-//			if(!tfEdgeStart.getText().isBlank() && !tfEdgeEnd.getText().isBlank() && !tfEdgeWeight.getText().isBlank()) {
-//				tfEdgeStart.setStyle(null);
-//				tfEdgeEnd.setStyle(null);
-//				tfEdgeWeight.setStyle(null);
-//				
-//				controller.addEdge(tfEdgeStart.getText(), tfEdgeEnd.getText(), tfEdgeWeight.getText(), edges);
-//				
-//				return;
-//			}			
-//			
-//			if(tfEdgeStart.getText().isBlank())
-//				tfEdgeStart.setStyle(TF_ERROR_STYLE);
-//			
-//			if(tfEdgeEnd.getText().isBlank())
-//				tfEdgeEnd.setStyle(TF_ERROR_STYLE);
-//			
-//			if(tfEdgeWeight.getText().isBlank())
-//				tfEdgeWeight.setStyle(TF_ERROR_STYLE);
 		});
 	}
 	

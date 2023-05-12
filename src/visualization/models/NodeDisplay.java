@@ -10,9 +10,18 @@ public class NodeDisplay extends Pane {
 	private Text label;
 	
 	public NodeDisplay(double xPosition, double yPosition, String label) {
+		//TODO make bigger, both
 		this.view = new Circle(xPosition, yPosition, RADIUS);
 		this.label = new Text(xPosition - 10, yPosition -10, label);
 		
 		getChildren().addAll(this.view, this.label);
+	}
+	
+	public double getX() {
+		return view.getCenterX();
+	}
+	
+	public double getY() {
+		return view.getCenterY();
 	}
 }

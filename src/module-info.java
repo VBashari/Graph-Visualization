@@ -1,4 +1,4 @@
-module graph {
+module asd {
 	requires javafx.base;
 	requires javafx.graphics;
     requires transitive javafx.controls;
