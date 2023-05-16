@@ -2,255 +2,238 @@ package implementation;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 public class Graph<E extends Comparable<E>> {
-	//TODO make so it can be directed or not
+	private boolean isDirected;
+	private Map<E, Set<Edge<E>>> list;
 	
-	/*operations
-	* check if element in graph
-	* add element to graph
-	* find path from A to B
-	*/
-
-	private ArrayList<E> nodes;
-	private ArrayList<ArrayList<Edge>> neighbors;
-	
-	public Graph() {
-		nodes = new ArrayList<>();
-		neighbors = new ArrayList<>();
+	public Graph(boolean isDirected) {
+		this.isDirected = isDirected;
+		list = new HashMap<>();
 	}
 	
-	public Graph(ArrayList<E> nodes, ArrayList<Edge> edges) {
-		this.nodes = nodes;
+	public Graph(boolean isDirected, E[] nodes, Edge<E>[] edges) {
+		this(isDirected);
 		
-		for(Edge e: edges)
-			addEdge(e.getX(), e.getY(), e.getWeight());
+		for(E node: nodes)
+			addNode(node);
+		
+		for(Edge<E> e: edges)
+			addEdge(e);
 	}
 	
 	public int size() {
-		return nodes.size();
+		return list.keySet().size();
 	}
 	
 	public ArrayList<E> getNodes() {
-		return nodes;
+		return new ArrayList<>(list.keySet());
 	}
 	
-	public E getNode(int index) {
-		return nodes.get(index);
-	}
-	
-	public int indexOf(E node) {
-		return nodes.indexOf(node);
-	}
-	
-	public ArrayList<Integer> getNeighbors(int index) {
-		ArrayList<Integer> neighbors = new ArrayList<>();
+	public ArrayList<E> getNeighbors(E node) {
+		if(!list.containsKey(node))
+			throw new IllegalArgumentException("Node " + node + " does not exist");
 		
-		for(Edge e : this.neighbors.get(index))
+		ArrayList<E> neighbors = new ArrayList<>();
+		
+		for(Edge<E> e: list.get(node))
 			neighbors.add(e.getY());
 		
 		return neighbors;
 	}
 	
-	public int getDegree(int index) {
-		return neighbors.get(index).size();
+	public boolean containsNode(E node) {
+		return list.containsKey(node);
 	}
 	
-	public double getWeight(int x, int y) throws Exception {
-		validateEdge(x, y);
+	public boolean containsEdge(E start, E end) {
+		if(!list.containsKey(start) || !list.containsKey(end))
+			return false;
 		
-		for(Edge e: neighbors.get(x)) {
-			if(e.getY() == y)
+		return list.get(start).contains(new Edge<E>(start, end));
+	}
+	
+	public int getDegree(E node) {
+		if(!list.containsKey(node))
+			throw new IllegalArgumentException("Node " + node + " does not exist");
+		
+		return list.get(node).size();
+	}
+	
+	public double getWeight(E start, E end) throws Exception {
+		validateEdge(start, end);
+		
+		for(Edge<E> e: list.get(start))
+			if(e.getY().equals(end))
 				return e.getWeight();
-		}
 		
 		throw new Exception("Edge not found");
 	}
 	
 	public void clear() {
-		nodes.clear();
-		neighbors.clear();
+		list.clear();
 	}
 	
 	public boolean addNode(E node) {
-		if(nodes.contains(node))
+		if(list.containsKey(node))
 			return false;
 		
-		nodes.add(node);
-		return neighbors.add(new ArrayList<Edge>());
+		list.put(node, new HashSet<>());
+		return true;
 	}
 	
-	public boolean addEdge(int x, int y) {
-		return addEdge(new Edge(x, y));
+	public boolean addEdge(E start, E end) {
+		return addEdge(new Edge<E>(start, end));
 	}
 	
-	public boolean addEdge(int x, int y, double weight) {
-		return addEdge(new Edge(x, y, weight));
+	public boolean addEdge(E start, E end, double weight) {
+		return addEdge(new Edge<E>(start, end, weight));
 	}
 	
-	public boolean addEdge(Edge e) {
-		validateEdge(e.getX(), e.getY());
-		
-		if(neighbors.get(e.getX()).contains(e))
+	public boolean addEdge(Edge<E> e) {
+		if(!list.containsKey(e.getX()) || !list.containsKey(e.getY()))
 			return false;
 		
-		return neighbors.get(e.getX()).add(e);
+		if(!isDirected)
+			list.get(e.getY()).add(e);
+			
+		return list.get(e.getX()).add(e);
 	}
 	
 	public boolean removeNode(E node) {
-		int index = nodes.indexOf(node);
-		
-		if(index == -1)
+		if(list.remove(node) == null)
 			return false;
+				
+		for(Set<Edge<E>> edges: list.values())
+			edges.removeIf(e -> e.getY().equals(node));
 		
-		for(Edge e: neighbors.get(index))
-			neighbors.get(e.getY()).remove(new Edge(e.getY(), e.getX()));
-		
-		neighbors.remove(index);
-		return nodes.remove(node);
+		return true;
 	}
 	
-	public boolean removeEdge(int x, int y) throws Exception {
-		validateEdge(x, y);
-		
-		for(Edge e: neighbors.get(x))
-			if(e.getY() == y)
-				return neighbors.get(x).remove(e);
-		
-		throw new Exception("Edge not found");
+	public boolean removeEdge(E start, E end) throws Exception {
+		return removeEdge(new Edge<E>(start, end));
 	}
 	
-	public void bfs(int x) {
-		if(x < 0 || x >= nodes.size())
-			throw new IllegalArgumentException("No " + x + " index");
+	public boolean removeEdge(Edge<E> e) throws Exception {
+		if(!isDirected)
+			list.get(e.getY()).remove(e);
 		
-		boolean[] isVisited = new boolean[nodes.size()];
-		Queue<Integer> queue = new ArrayDeque<>();
+		return list.get(e.getX()).remove(e);
+	}
+	
+	public ArrayList<E> bfs(E node) {		
+		if(!list.containsKey(node))
+			return null;
+
+		ArrayList<E> traversal = new ArrayList<>();
+		HashMap<E, Boolean> isVisited = new HashMap<>();
+		Queue<E> queue = new ArrayDeque<>();
 		
-		queue.add(x);
-		isVisited[x] = true;
+		queue.add(node);
+		isVisited.put(node, true);
 		
 		while(!queue.isEmpty()) {
-			int temp = queue.poll();
-			System.out.print(nodes.get(temp) + " ");
-			
-			for(Edge e: neighbors.get(temp)) {
-				if(!isVisited[e.getY()]) {
-					queue.add(e.getY());
-					isVisited[e.getY()] = true;
+			E temp = queue.poll();
+			traversal.add(temp);
+			for(Edge<E> e: list.get(temp)) {
+				E element = e.getY();
+				
+				if(isVisited.get(element) == null) {
+					queue.add(element);
+					isVisited.put(element, true);
 				}
 			}
 		}
 		
-		System.out.println();
+		return traversal;
 	}
 	
-	public void dfs(int x) {
-		if(x < 0 || x >= nodes.size())
-			throw new IllegalArgumentException("No " + x + " index");
+	public ArrayList<E> dfs(E node) {
+		if(!list.containsKey(node))
+			return null;
 		
-		boolean[] isVisited = new boolean[nodes.size()];		
-		dfs(x, isVisited);
+		ArrayList<E> traversal = new ArrayList<>();
+		HashMap<E, Boolean> isVisited = new HashMap<>();
 		
-		System.out.println();
+		dfs(node, isVisited, traversal);
+		return traversal;
 	}
 	
-	private void dfs(int x, boolean[] isVisited) {
-		isVisited[x] = true;
-		System.out.print(nodes.get(x) + " ");
+	private void dfs(E node, HashMap<E, Boolean> isVisited, ArrayList<E> traversal) {
+		isVisited.put(node, true);
+		traversal.add(node);
 		
-		for(Edge e: neighbors.get(x)) {
-			if(!isVisited[e.getY()])
-				dfs(e.getY(), isVisited);
+		for(Edge<E> e: list.get(node))
+			if(isVisited.get(e.getY()) == null)
+				dfs(e.getY(), isVisited, traversal);
+	}
+
+	public ArrayList<E> shortestPath(E start, E end) {
+		if(!list.containsKey(start) || !list.containsKey(end))
+			return null;
+		
+		
+		ArrayList<E> path = new ArrayList<>();
+		HashMap<E, Double> distances = new HashMap<>();
+		HashMap<E, E> previous = new HashMap<>();
+		
+		for(E node: list.keySet()) {
+			distances.put(node, Double.NEGATIVE_INFINITY);
+			previous.put(node, null);
 		}
-	}
-
-	public double minimumSpanningTree() throws Exception {
-		return minimumSpanningTree(0);
-	}
-	
-	public double minimumSpanningTree(int index) throws Exception {
-		if(index < 0 || index >= nodes.size())
-			throw new IllegalArgumentException("No " + index + " index");
 		
-		double totalWeight = 0;
-		double[] weights= new double[nodes.size()];
-		ArrayList<Integer> tree = new ArrayList<>();
+		distances.put(start, 0.0);
 		
-		for(int i = 0; i < weights.length; i++)
-			weights[i] = Double.POSITIVE_INFINITY;
 		
-		weights[index] = 0;
-		
-		while(tree.size() < size()) {
-			int minIndex= -1;
-			double minWeight = Double.POSITIVE_INFINITY;
-			
-			for(int i = 0; i < size(); i++) {
-				if(!tree.contains(i) && weights[i] < minWeight) {
-					minWeight = weights[i];
-					minIndex = i;
-				}
-			}
-			
-			if(minIndex == -1)
-				throw new Exception("Graph is not fully connected");
-
-			tree.add(minIndex);
-			totalWeight += weights[minIndex];
-			System.out.print(nodes.get(minIndex) + " ");
-			
-			for(Edge e: neighbors.get(minIndex)) {
-				if(!tree.contains(e.getY()) && weights[e.getY()] > e.getWeight())
-					weights[e.getY()] = e.getWeight();
+		for(int i = 0; i < list.keySet().size(); i++) {
+			for(E node: list.keySet()) {
+				for(Edge<E> e: list.get(node))
+					if(distances.get(e.getX()) + e.getWeight() > distances.get(e.getY())) {
+						distances.put(e.getY(), distances.get(e.getX()) + e.getWeight());
+						previous.put(e.getY(), e.getX());
+					}
 			}
 		}
 		
-		return totalWeight;
-	}
-	
-	//TODO
-	public void shortestPath(int startIndex, int endIndex) {
-//		validateEdge(startIndex, endIndex);
-//		
-//		System.out.print(nodes.get(startIndex) + " ");
-//		
-//		double[] weights = new double[nodes.size()];
-//		Integer[] prev = new Integer[nodes.size()];
-//		
-//		for(int i = 0; i < nodes.size(); i++) {
-//			weights[i] = Double.POSITIVE_INFINITY;
-//			prev[i] = null;
-//		}
-//		
-//		weights[startIndex] = 0;
-//		
-//		
-	}
-	
-	private void validateEdge(int x, int y) {		
-		if(x < 0 || x >= nodes.size())
-			throw new IllegalArgumentException("No " + x + " index");
+		previous.put(start, null);
 		
-		if(y < 0 || y >= nodes.size())
-			throw new IllegalArgumentException("No " + y + " index");
+		if(distances.get(end) == Double.NEGATIVE_INFINITY)
+			return null;
+		
+		for(E node = end; node != null; node = previous.get(node))
+			path.add(node);
+		
+		Collections.reverse(path);
+		return path;
+	}
+	
+	private void validateEdge(E start, E end) {		
+		if(!list.containsKey(start))
+			throw new IllegalArgumentException("No " + start + " node");
+		
+		if(!list.containsKey(end))
+			throw new IllegalArgumentException("No " + end + " node");
 	}
 	
 	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder();
 		
-		for(int i = 0; i < neighbors.size(); i++) {
-			str.append(getNode(i) + ": ");
+		for(Map.Entry<E, Set<Edge<E>>> entry: list.entrySet()) {
+			str.append(entry.getKey() + ": ");
 			
-			for(Edge e : neighbors.get(i))
-				str.append("(" + getNode(e.getX()) + ", " + getNode(e.getY()) + ", " + e.getWeight() + ") ");
+			for(Edge<E> e: entry.getValue())
+				str.append("(" + e.getX() + ", " + e.getY() + ", " + e.getWeight() + ") ");
 			
 			str.append("\n");
 		}
 		
 		return str.toString();
 	}
-	
 }
