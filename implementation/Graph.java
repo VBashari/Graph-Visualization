@@ -114,7 +114,7 @@ public class Graph<E extends Comparable<E>> {
 			return false;
 		
 		if(!isDirected)
-			list.get(e.getY()).add(e);
+			list.get(e.getY()).add(new Edge<E>(e.getY(), e.getX(), e.getWeight()));
 			
 		return list.get(e.getX()).add(e);
 	}
