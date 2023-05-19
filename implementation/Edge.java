@@ -1,14 +1,14 @@
 package implementation;
 
-public class Edge {
+public class Edge<E> {
 	private double weight;
-	private int x, y;
+	private E x, y;
 	
-	public Edge(int x, int y) {
+	public Edge(E x, E y) {
 		this(x, y, 0);
 	}
 	
-	public Edge(int x, int y, double weight) {
+	public Edge(E x, E y, double weight) {
 		this.x = x;
 		this.y = y;
 		this.weight = weight;
@@ -18,16 +18,17 @@ public class Edge {
 		return weight;
 	}
 
-	public int getX() {
+	public E getX() {
 		return x;
 	}
 
-	public int getY() {
+	public E getY() {
 		return y;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(Object o) {
-		return !(o instanceof Edge) ? false : ((Edge)o).getX() == x && ((Edge)o).getY() == y;
+		return !(o instanceof Edge) ? false : ((Edge<E>)o).getX().equals(x) && ((Edge<E>)o).getY().equals(y);
 	}
 }

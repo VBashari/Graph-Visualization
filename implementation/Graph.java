@@ -28,8 +28,21 @@ public class Graph<E extends Comparable<E>> {
 			addEdge(e);
 	}
 	
+	@SuppressWarnings("unchecked")
+	public Graph(boolean isDirected, ArrayList<E> nodes, ArrayList<Edge<E>> edges) {
+		this(isDirected, (E[]) nodes.toArray(), (Edge<E>[]) edges.toArray());	
+	}
+	
 	public int size() {
 		return list.keySet().size();
+	}
+	
+	public boolean isDirected() {
+		return isDirected;
+	}
+	
+	public void isDirected(boolean isDirected) {
+		this.isDirected = isDirected;
 	}
 	
 	public ArrayList<E> getNodes() {
