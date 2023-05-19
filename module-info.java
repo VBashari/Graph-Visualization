@@ -5,7 +5,9 @@ module asd {
     requires javafx.media;
     requires java.desktop;
     
-//    exports visualization.models;
+    exports implementation;
+    
+    exports visualization.models;
     exports visualization.views;
-//    exports visualization.controllers;
+    exports visualization.controllers;
 }
