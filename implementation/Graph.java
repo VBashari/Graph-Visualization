@@ -69,7 +69,8 @@ public class Graph<E extends Comparable<E>> {
 		if(!list.containsKey(start) || !list.containsKey(end))
 			return false;
 		
-		return list.get(start).contains(new Edge<E>(start, end));
+		return getNeighbors(start).contains(end);
+//		return list.get(start).contains(new Edge<E>(start, end));
 	}
 	
 	public int getDegree(E node) {
@@ -99,6 +100,11 @@ public class Graph<E extends Comparable<E>> {
 		
 		list.put(node, new HashSet<>());
 		return true;
+	}
+	
+	public void addNodes(E[] nodes) {
+		for(E node: nodes)
+			addNode(node);
 	}
 	
 	public boolean addEdge(E start, E end) {
@@ -187,36 +193,42 @@ public class Graph<E extends Comparable<E>> {
 				dfs(e.getY(), isVisited, traversal);
 	}
 
-	public ArrayList<E> shortestPath(E start, E end) {
+	public ArrayList<E> shortestPath(E start, E end) throws Exception {
 		if(!list.containsKey(start) || !list.containsKey(end))
 			return null;
-		
 		
 		ArrayList<E> path = new ArrayList<>();
 		HashMap<E, Double> distances = new HashMap<>();
 		HashMap<E, E> previous = new HashMap<>();
+		HashSet<Edge<E>> edges = new HashSet<>();
 		
 		for(E node: list.keySet()) {
-			distances.put(node, Double.NEGATIVE_INFINITY);
+			distances.put(node, Double.POSITIVE_INFINITY);
 			previous.put(node, null);
+			edges.addAll(list.get(node));
 		}
 		
 		distances.put(start, 0.0);
 		
-		
-		for(int i = 0; i < list.keySet().size(); i++) {
-			for(E node: list.keySet()) {
-				for(Edge<E> e: list.get(node))
-					if(distances.get(e.getX()) + e.getWeight() > distances.get(e.getY())) {
-						distances.put(e.getY(), distances.get(e.getX()) + e.getWeight());
-						previous.put(e.getY(), e.getX());
-					}
+		for(int i = 0; i < list.keySet().size()-1; i++) {
+			for(Edge<E> e: edges) {
+				double distance = distances.get(e.getX()) + e.getWeight();
+				
+				if(distance < distances.get(e.getY())) {
+					distances.put(e.getY(), distance);
+					previous.put(e.getY(), e.getX());
+				}
 			}
 		}
+
+		//Fail if there's a negative weight cycle
+		for(Edge<E> e: edges) {
+			if(distances.get(e.getX()) + e.getWeight() < distances.get(e.getY()))
+				throw new Exception("Negative-weight cycle exists");
+		}
 		
-		previous.put(start, null);
-		
-		if(distances.get(end) == Double.NEGATIVE_INFINITY)
+		//Fail if there's no possible connection routes between start & end
+		if(previous.get(end) == null)
 			return null;
 		
 		for(E node = end; node != null; node = previous.get(node))
