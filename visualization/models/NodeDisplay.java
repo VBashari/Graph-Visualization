@@ -7,21 +7,38 @@ import javafx.scene.text.Text;
 public class NodeDisplay extends Pane {
 	private static int RADIUS = 5;
 	private Circle view;
-	private Text label;
+	private Text value;
 	
-	public NodeDisplay(double xPosition, double yPosition, String label) {
+	public NodeDisplay(double xPosition, double yPosition, String value) {
 		//TODO make bigger, both
-		this.view = new Circle(xPosition, yPosition, RADIUS);
-		this.label = new Text(xPosition - 10, yPosition -10, label);
+		this.view = new Circle(RADIUS);
+		this.value = new Text(view.getCenterX() - 10, view.getCenterY() -10, value);
 		
-		getChildren().addAll(this.view, this.label);
+		
+		
+		getChildren().addAll(this.view, this.value);
+		setStyle("-fx-background-color: gray"); 
+		this.view.setStyle("-fx-background-color: red");
+		this.value.setStyle("-fx-background-color: red");
 	}
 	
-	public double getX() {
-		return view.getCenterX();
+//	public double getX() {
+//		return view.getCenterX();
+//	}
+//	
+//	public double getY() {
+//		return view.getCenterY();
+//	}
+	
+	public String value() {
+		return value.getText();
 	}
 	
-	public double getY() {
-		return view.getCenterY();
+	@Override
+	public boolean equals(Object o) {
+		if(o instanceof NodeDisplay)
+			return ((NodeDisplay) o).getLayoutX() == getLayoutX() && ((NodeDisplay) o).getLayoutY() == getLayoutY();
+		
+		return false;
 	}
 }
