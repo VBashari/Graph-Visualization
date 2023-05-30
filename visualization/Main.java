@@ -1,4 +1,4 @@
-package visualization.views;
+package visualizationREDO;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -11,8 +11,10 @@ public class Main extends Application {
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		GraphDisplay view = new GraphDisplay();
+		
 		primaryStage.setTitle("Graph visualization");
-		primaryStage.setScene(new Scene(new CustomPane()));
+		primaryStage.setScene(new Scene(view));
 		primaryStage.show();
 	}
 	
