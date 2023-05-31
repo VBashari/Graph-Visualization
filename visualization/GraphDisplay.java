@@ -74,7 +74,7 @@ public class GraphDisplay extends BorderPane {
 				while(node.next()) {
 					if(node.wasAdded()) {
 						for(Node x: node.getAddedSubList()) {
-							edgeStartOptions.getItems().add(x.toString());
+							edgeStartOptions.getItems().add(((NodeDisplay) x).getVa());
 							edgeEndOptions.getItems().add(x.toString());
 						}
 					} else if(node.wasRemoved()) {

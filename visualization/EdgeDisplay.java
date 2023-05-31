@@ -9,6 +9,8 @@ public class EdgeDisplay extends Group {
 	private Text weight;
 //	private Polygon directionTriangle;
 	
+	private NodeDisplay start, end;
+	
 	public EdgeDisplay(NodeDisplay start, NodeDisplay end, double weight) {
 		line = new Line();
 		this.weight = new Text(String.valueOf(weight));
@@ -25,6 +27,8 @@ public class EdgeDisplay extends Group {
 		this.weight.xProperty().bind(line.startXProperty().add(line.endXProperty()).divide(2));
 		this.weight.yProperty().bind(line.startYProperty().add(line.endYProperty().divide(2)));
 		
+		this.start = start;
+		this.end = end;
 		// Setting initial points of the triangle
 //		directionTriangle.getPoints().addAll(new Double[] {
 //			end.centerXProperty().doubleValue(), end.centerYProperty().doubleValue(), // head on triangle
@@ -38,5 +42,13 @@ public class EdgeDisplay extends Group {
 //		});
 		
 		getChildren().addAll(line, this.weight);
+	}
+	
+	public NodeDisplay getStartNode() {
+		return start;
+	}
+	
+	public NodeDisplay getEndNode() {
+		return end;
 	}
 }

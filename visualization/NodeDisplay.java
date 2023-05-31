@@ -18,8 +18,7 @@ public class NodeDisplay extends Group {
 		getChildren().addAll(shape, this.value);
 	}
 
-	@Override
-	public String toString() {
+	public String getValue() {
 		return value.getText();
 	}
 }

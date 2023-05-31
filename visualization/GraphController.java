@@ -23,8 +23,7 @@ public class GraphController {
 		
 		nodes = new Group();
 		edges = new Group();
-		edges.setStyle("-fx-border-color: black");
-edges.getChildren().add(new Circle(23));
+
 		pane = new Pane(nodes, edges);
 		pane.setPrefSize(500, 500);
 	}
@@ -52,8 +51,11 @@ edges.getChildren().add(new Circle(23));
 			node.setOnMouseClicked(e -> {
 				if(e.getButton() == MouseButton.SECONDARY) {
 					e.consume();
-					nodes.getChildren().remove(node);
 					//TODO remove edges
+					if(graph.removeNode(node.getValue())) {
+						nodes.getChildren().remove(node);
+						edges.getChildren().removeIf(x -> ((EdgeDisplay) x).getStartNode().equals(node));
+					}
 				}
 			});
 			
@@ -73,19 +75,23 @@ edges.getChildren().add(new Circle(23));
 			double weightValue = weight.isBlank() ? 0 : Double.parseDouble(weight);
 			NodeDisplay start = (NodeDisplay) nodes.getChildren().get(startNodeIndex), end = (NodeDisplay) nodes.getChildren().get(endNodeIndex);
 			
-			if(graph.addEdge(start.toString(), end.toString(), weightValue)) {
+			if(graph.addEdge(start.getValue(), end.getValue(), weightValue)) {
 				EdgeDisplay edge = new EdgeDisplay(
 					(NodeDisplay) nodes.getChildren().get(startNodeIndex),
 					(NodeDisplay) nodes.getChildren().get(endNodeIndex),
 					weightValue
 				);
 				
+				// Remove edge by right clicking on it
+				edge.setOnMouseClicked(e -> {
+					if(e.getButton() == MouseButton.SECONDARY) {
+						e.consume();
+						edges.getChildren().remove(edge);
+					}
+				});
+				
 				edges.getChildren().add(edge);
 			}
-			
-			
-			for(Node x: edges.getChildren())
-				System.out.println(x);
 		} catch(NumberFormatException ex) {
 			throw new IllegalArgumentException("Weight has to be of numeric value");
 		}
