@@ -9,7 +9,6 @@ import javafx.scene.Node;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
 
 public class GraphController {
 	private Graph<String> graph;
@@ -25,7 +24,7 @@ public class GraphController {
 		nodes = new Group();
 		edges = new Group();
 		edges.setStyle("-fx-border-color: black");
-
+edges.getChildren().add(new Circle(23));
 		pane = new Pane(nodes, edges);
 		pane.setPrefSize(500, 500);
 	}
@@ -59,9 +58,7 @@ public class GraphController {
 			});
 			
 			// Add drag-and-drop feature
-			node.setOnMouseDragged(e -> {
-				node.relocate(e.getSceneX(), e.getSceneY());
-			});
+			node.setOnMouseDragged(e -> node.relocate(e.getSceneX(), e.getSceneY()));
 		}
 	}
 	
@@ -76,34 +73,14 @@ public class GraphController {
 			double weightValue = weight.isBlank() ? 0 : Double.parseDouble(weight);
 			NodeDisplay start = (NodeDisplay) nodes.getChildren().get(startNodeIndex), end = (NodeDisplay) nodes.getChildren().get(endNodeIndex);
 			
-			if(graph.addEdge(start.toString(), end.toString(), weightValue)) {				
-				Line line = new Line();
-				line.setStartX(0.0f);
-				line.setStartY(0.0f);
-				line.setEndX(100.0f);
-				line.setEndY(100.0f);
+			if(graph.addEdge(start.toString(), end.toString(), weightValue)) {
+				EdgeDisplay edge = new EdgeDisplay(
+					(NodeDisplay) nodes.getChildren().get(startNodeIndex),
+					(NodeDisplay) nodes.getChildren().get(endNodeIndex),
+					weightValue
+				);
 				
-				line.startXProperty().bind(start.centerXProperty());
-				line.startYProperty().bind(start.centerYProperty());
-				
-				line.endXProperty().bind(end.centerXProperty());
-				line.endYProperty().bind(end.centerYProperty());
-				
-				edges.getChildren().addAll(line, new Circle());
-				System.out.println(start);
-//				EdgeDisplay edge = new EdgeDisplay(
-//					(NodeDisplay) nodes.getChildren().get(startNodeIndex),
-//					(NodeDisplay) nodes.getChildren().get(endNodeIndex),
-//					weightValue
-//				);
-//				
-//				edge.getLine().startXProperty().bind(start.centerXProperty());
-//				edge.getLine().startYProperty().bind(start.centerYProperty());
-//				
-//				edge.getLine().endXProperty().bind(end.centerXProperty());
-//				edge.getLine().endYProperty().bind(end.centerYProperty());
-//				
-//				edges.getChildren().add(edge);
+				edges.getChildren().add(edge);
 			}
 			
 			

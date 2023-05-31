@@ -1,6 +1,5 @@
 package visualizationREDO;
 
-import javafx.beans.property.DoubleProperty;
 import javafx.scene.Group;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
@@ -18,15 +17,7 @@ public class NodeDisplay extends Group {
 		
 		getChildren().addAll(shape, this.value);
 	}
-	
-	public DoubleProperty centerXProperty() {
-		return shape.centerXProperty();
-	}
-	
-	public DoubleProperty centerYProperty() {
-		return shape.centerYProperty();
-	}
-	
+
 	@Override
 	public String toString() {
 		return value.getText();

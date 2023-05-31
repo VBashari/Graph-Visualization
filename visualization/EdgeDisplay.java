@@ -2,13 +2,12 @@ package visualizationREDO;
 
 import javafx.scene.Group;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 
 public class EdgeDisplay extends Group {
 	private Line line;
 	private Text weight;
-	private Polygon directionTriangle;
+//	private Polygon directionTriangle;
 	
 	public EdgeDisplay(NodeDisplay start, NodeDisplay end, double weight) {
 		line = new Line();
@@ -16,11 +15,11 @@ public class EdgeDisplay extends Group {
 //		directionTriangle = new Polygon();
 
 		// Binding line to nodes
-//		line.startXProperty().bind(start.centerXProperty());
-//		line.startYProperty().bind(start.centerYProperty());
-//		
-//		line.endXProperty().bind(end.centerXProperty());
-//		line.endYProperty().bind(end.centerYProperty());
+		line.startXProperty().bind(start.layoutXProperty());
+		line.startYProperty().bind(start.layoutYProperty());
+		
+		line.endXProperty().bind(end.layoutXProperty());
+		line.endYProperty().bind(end.layoutYProperty());
 		
 		// Binding weight text to line
 		this.weight.xProperty().bind(line.startXProperty().add(line.endXProperty()).divide(2));
@@ -39,9 +38,5 @@ public class EdgeDisplay extends Group {
 //		});
 		
 		getChildren().addAll(line, this.weight);
-	}
-	
-	public Line getLine() {
-		return line;
 	}
 }
