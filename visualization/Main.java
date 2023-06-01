@@ -1,4 +1,4 @@
-package visualizationREDO;
+package visualization;
 
 import javafx.application.Application;
 import javafx.scene.Scene;

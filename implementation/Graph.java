@@ -41,7 +41,7 @@ public class Graph<E extends Comparable<E>> {
 		return isDirected;
 	}
 	
-	public void isDirected(boolean isDirected) {
+	public void setIsDirected(boolean isDirected) {
 		this.isDirected = isDirected;
 	}
 	

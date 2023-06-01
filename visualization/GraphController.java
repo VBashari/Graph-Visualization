@@ -1,5 +1,7 @@
-package visualizationREDO;
+package visualization;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import implementation.Graph;
@@ -8,10 +10,9 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Circle;
 
 public class GraphController {
-	private Graph<String> graph;
+	private Graph<NodeDisplay> graph;
 	private Random rand;
 	
 	private Pane pane;
@@ -23,8 +24,9 @@ public class GraphController {
 		
 		nodes = new Group();
 		edges = new Group();
-
-		pane = new Pane(nodes, edges);
+		
+		pane = new Pane(edges, nodes);
+		pane.setStyle("-fx-border-color: black");
 		pane.setPrefSize(500, 500);
 	}
 	
@@ -41,26 +43,27 @@ public class GraphController {
 		if(value.isBlank())
 			throw new IllegalArgumentException("Node value cannot be empty");
 		
-		if(graph.addNode(value)) {
-			NodeDisplay node = new NodeDisplay(value);
+		NodeDisplay node = new NodeDisplay(value);
+		
+		if(graph.addNode(node)) {
 			nodes.getChildren().add(node);
-
-			node.relocate(rand.nextDouble() * 500, rand.nextDouble() * 500);
+			node.relocate(rand.nextDouble() * node.getParent().getLayoutBounds().getMaxX(), rand.nextDouble() * node.getParent().getLayoutBounds().getMaxY());
 			
-			// Remove node by right clicking on it
+			// Remove node by right-clicking on it
 			node.setOnMouseClicked(e -> {
 				if(e.getButton() == MouseButton.SECONDARY) {
 					e.consume();
-					//TODO remove edges
-					if(graph.removeNode(node.getValue())) {
+					// Remove edges
+					if(graph.removeNode(node)) {
 						nodes.getChildren().remove(node);
-						edges.getChildren().removeIf(x -> ((EdgeDisplay) x).getStartNode().equals(node));
+						edges.getChildren().removeIf(x -> ((EdgeDisplay) x).getStartNode().equals(node) || ((EdgeDisplay) x).getEndNode().equals(node));
 					}
 				}
 			});
 			
 			// Add drag-and-drop feature
-			node.setOnMouseDragged(e -> node.relocate(e.getSceneX(), e.getSceneY()));
+			DraggableNode delta = new DraggableNode();
+			delta.makeDraggable(node);
 		}
 	}
 	
@@ -75,25 +78,59 @@ public class GraphController {
 			double weightValue = weight.isBlank() ? 0 : Double.parseDouble(weight);
 			NodeDisplay start = (NodeDisplay) nodes.getChildren().get(startNodeIndex), end = (NodeDisplay) nodes.getChildren().get(endNodeIndex);
 			
-			if(graph.addEdge(start.getValue(), end.getValue(), weightValue)) {
-				EdgeDisplay edge = new EdgeDisplay(
-					(NodeDisplay) nodes.getChildren().get(startNodeIndex),
-					(NodeDisplay) nodes.getChildren().get(endNodeIndex),
-					weightValue
-				);
+			if(graph.addEdge(start, end, weightValue)) {
+				if(!graph.isDirected())
+					addEdge(end, start, weightValue);
 				
-				// Remove edge by right clicking on it
-				edge.setOnMouseClicked(e -> {
-					if(e.getButton() == MouseButton.SECONDARY) {
-						e.consume();
-						edges.getChildren().remove(edge);
-					}
-				});
-				
-				edges.getChildren().add(edge);
+				addEdge(start, end, weightValue);
 			}
 		} catch(NumberFormatException ex) {
 			throw new IllegalArgumentException("Weight has to be of numeric value");
 		}
+	}
+	
+	public List<NodeDisplay> bfs(int nodeIndex) {
+		//	Value validation
+		if(nodeIndex < -1 || nodeIndex >= nodes.getChildren().size())
+			throw new IndexOutOfBoundsException("Out of bounds node value");
+		
+		return Collections.unmodifiableList(graph.bfs(((NodeDisplay) nodes.getChildren().get(nodeIndex))));
+	}
+	
+	public List<NodeDisplay> dfs(int nodeIndex) {
+		// Value validation
+		if(nodeIndex < -1 || nodeIndex >= nodes.getChildren().size())
+			throw new IndexOutOfBoundsException("Out of bounds node value");
+		
+		return Collections.unmodifiableList(graph.dfs(((NodeDisplay) nodes.getChildren().get(nodeIndex))));
+	}
+	
+	public List<NodeDisplay> shortestPath(int startNodeIndex, int endNodeIndex) throws Exception {
+		// Value validation
+		if(startNodeIndex < -1 || startNodeIndex >= nodes.getChildren().size())
+			throw new IndexOutOfBoundsException("Out of bounds start node value");
+		else if(endNodeIndex < -1 || endNodeIndex >= nodes.getChildren().size())
+			throw new IndexOutOfBoundsException("Out of bounds start node value");
+		
+		try {
+			return Collections.unmodifiableList(graph.shortestPath((NodeDisplay) nodes.getChildren().get(startNodeIndex),
+					(NodeDisplay) nodes.getChildren().get(endNodeIndex)));
+		} catch(Exception ex) {
+			throw ex;//TODO throw an error pip
+		}
+	}
+	
+	private void addEdge(NodeDisplay start, NodeDisplay end, double weight) {
+		EdgeDisplay edge = new EdgeDisplay(start, end, weight);
+			
+		// Remove edge by right-clicking on it
+		edge.setOnMouseClicked(e -> {
+			if(e.getButton() == MouseButton.SECONDARY) {
+				e.consume();
+				edges.getChildren().remove(edge);
+			}
+		});
+			
+		edges.getChildren().add(edge);
 	}
 }

@@ -6,8 +6,8 @@ module asd {
     requires java.desktop;
     
     exports implementation;
-    
-    exports visualization.models;
-    exports visualization.views;
-    exports visualization.controllers;
+    exports visualization;
+//    exports visualization.models;
+//    exports visualization.views;
+//    exports visualization.controllers;
 }
