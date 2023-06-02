@@ -32,5 +32,8 @@ public class Edge<E> {
 		return !(o instanceof Edge) ? false : ((Edge<E>)o).getX().equals(x) && ((Edge<E>)o).getY().equals(y);
 	}
 	
-	public String toString() {return getX() + " " + getY();}
+	@Override
+	public String toString() {
+		return getX() + " " + getY();
+	}
 }

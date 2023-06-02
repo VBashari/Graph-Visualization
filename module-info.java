@@ -7,7 +7,5 @@ module asd {
     
     exports implementation;
     exports visualization;
-//    exports visualization.models;
-//    exports visualization.views;
-//    exports visualization.controllers;
+    exports visualization.models;
 }

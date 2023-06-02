@@ -1,4 +1,4 @@
-package visualization;
+package visualization.models;
 
 import javafx.scene.Group;
 import javafx.scene.shape.Circle;
@@ -38,5 +38,10 @@ public class NodeDisplay extends Group implements Comparable<NodeDisplay> {
 			return ((NodeDisplay) obj).getValue().equals(this.getValue());
 		
 		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return getValue();
 	}
 }

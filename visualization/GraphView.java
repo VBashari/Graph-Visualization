@@ -18,21 +18,19 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import visualization.models.NodeDisplay;
 
-public class GraphDisplay extends BorderPane {
+public class GraphView extends BorderPane {
 	private GraphController controller = new GraphController();
 	
 	private MenuBar menuBar = new MenuBar();
@@ -48,7 +46,7 @@ public class GraphDisplay extends BorderPane {
 	
 	private static final String TF_ERROR_STYLE = "-fx-text-box-border: red", CB_ERROR_STYLE = "-fx-border-color: red";
 
-	public GraphDisplay() {
+	public GraphView() {
 		tfNewNode.setPromptText("Add node value");
 		tfEdgeWeight.setPromptText("Add edge weight");
 		
@@ -67,6 +65,7 @@ public class GraphDisplay extends BorderPane {
 		
 		setMenuHelpListener();
 		
+		controller.getPane().setStyle("-fx-border-color: gray; -fx-border-width: 10px");
 		createLayout();
 	}
 	

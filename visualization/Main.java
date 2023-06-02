@@ -11,7 +11,7 @@ public class Main extends Application {
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		GraphDisplay view = new GraphDisplay();
+		GraphView view = new GraphView();
 		
 		primaryStage.setTitle("Graph visualization");
 		primaryStage.setScene(new Scene(view));

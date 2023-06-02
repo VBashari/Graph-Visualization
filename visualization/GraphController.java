@@ -10,6 +10,9 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
+import visualization.models.DraggableNode;
+import visualization.models.EdgeDisplay;
+import visualization.models.NodeDisplay;
 
 public class GraphController {
 	private Graph<NodeDisplay> graph;
@@ -26,7 +29,6 @@ public class GraphController {
 		edges = new Group();
 		
 		pane = new Pane(edges, nodes);
-		pane.setStyle("-fx-border-color: black");
 		pane.setPrefSize(500, 500);
 	}
 	
@@ -46,6 +48,8 @@ public class GraphController {
 		NodeDisplay node = new NodeDisplay(value);
 		
 		if(graph.addNode(node)) {
+			System.out.println(graph);
+			
 			nodes.getChildren().add(node);
 			node.relocate(rand.nextDouble() * node.getParent().getLayoutBounds().getMaxX(), rand.nextDouble() * node.getParent().getLayoutBounds().getMaxY());
 			
@@ -114,9 +118,9 @@ public class GraphController {
 		
 		try {
 			return Collections.unmodifiableList(graph.shortestPath((NodeDisplay) nodes.getChildren().get(startNodeIndex),
-					(NodeDisplay) nodes.getChildren().get(endNodeIndex)));
+																	(NodeDisplay) nodes.getChildren().get(endNodeIndex)));
 		} catch(Exception ex) {
-			throw ex;//TODO throw an error pip
+			throw ex;
 		}
 	}
 	

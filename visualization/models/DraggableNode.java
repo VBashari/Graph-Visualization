@@ -1,4 +1,4 @@
-package visualization;
+package visualization.models;
 
 import javafx.geometry.Point2D;
 import javafx.scene.Node;

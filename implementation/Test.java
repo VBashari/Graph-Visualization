@@ -11,6 +11,7 @@ public class Test {
 		g.addEdge('b','f', 2);
 		g.addEdge('f', 'e', 8);
 		
+		System.out.println(g.addNode('a'));
 		System.out.println(g.dfs('a').toString());
 	}
 }
