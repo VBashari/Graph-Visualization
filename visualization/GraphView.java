@@ -7,6 +7,8 @@ import javafx.animation.ParallelTransition;
 import javafx.animation.SequentialTransition;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -37,6 +39,7 @@ public class GraphView extends BorderPane {
 	private Menu menuOptions = new Menu("Options"), menuHelp;
 	private CheckMenuItem isDirected = new CheckMenuItem("Show as directed graph");
 	
+	private Color nodeColor = Color.web("#33658A");
 	private TextField tfNewNode = new TextField(), tfEdgeWeight = new TextField();
 	private ComboBox<String> nodeStartOptions = new ComboBox<>(), nodeEndOptions = new ComboBox<>(),
 			singleNodeOptions = new ComboBox<>();
@@ -64,22 +67,27 @@ public class GraphView extends BorderPane {
 		setShortestPathListener();
 		
 		setMenuHelpListener();
-		
-		controller.getPane().setStyle("-fx-border-color: gray; -fx-border-width: 10px");
+		setDirectedOptionListener();
 		createLayout();
+		
+		// Styling
+		getStylesheets().add(getClass().getResource("style.css").toExternalForm());
+		setStyle("-fx-background-color: #FEFFFE");
 	}
 	
 	private void createLayout() {
+		// Menu
 		menuBar.getMenus().addAll(menuHelp, menuOptions);
 		menuOptions.getItems().add(isDirected);
 		
+		// Sidebar components
 		HBox newNodeBar = new HBox(tfNewNode, btnAddNode),
 			newEdgeBar = new HBox(tfEdgeWeight, btnAddEdge),
 			dualNodeBar = new HBox(nodeStartOptions, nodeEndOptions);
 			
 		newNodeBar.setSpacing(5);
-		newEdgeBar.setSpacing(5);
 		dualNodeBar.setSpacing(5);
+		newEdgeBar.setSpacing(5);
 		
 		VBox singleNodeBar = new VBox(new Label("Single node operations"), singleNodeOptions, btnBFS, btnDFS);
 		VBox edgeBar = new VBox(new Label("Dual node operations"), dualNodeBar, newEdgeBar, btnShortestPath);
@@ -87,9 +95,11 @@ public class GraphView extends BorderPane {
 		singleNodeBar.setSpacing(3);
 		edgeBar.setSpacing(3);
 		
+		// Sidebar
 		VBox sidebar = new VBox(newNodeBar, singleNodeBar, edgeBar);
 		sidebar.setPadding(new Insets(20));
 		sidebar.setSpacing(20);
+		sidebar.setStyle("-fx-background-color: #B4B8C5");
 		
 		setTop(menuBar);
 		setCenter(controller.getPane());
@@ -108,6 +118,18 @@ public class GraphView extends BorderPane {
 		
 		toColorSequence.play();
 		toColorSequence.setOnFinished(e -> fromColorSequence.play());
+	}
+	
+	private void setDirectedOptionListener() {
+		isDirected.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent e) {
+				if(isDirected.isSelected())
+					controller.setDirected();
+				else
+					controller.setUndirected();
+			}
+		});
 	}
 	
 	private void setAddNodeListener() {
@@ -153,15 +175,12 @@ public class GraphView extends BorderPane {
 				if(singleNodeOptions.getSelectionModel().isEmpty())
 					throw new IndexOutOfBoundsException("Select a node");
 				
-				List<NodeDisplay> bfsList = controller.bfs(singleNodeOptions.getSelectionModel().getSelectedIndex());
-				
-				// If no results, do nothing
-				if(bfsList == null)
-					return;
-				
-				animateColorTrans(bfsList, Color.BLACK, Color.RED);
+				List<NodeDisplay> bfsList = controller.bfs(singleNodeOptions.getSelectionModel().getSelectedIndex());				
+				animateColorTrans(bfsList, nodeColor, Color.CRIMSON);
 			} catch(IndexOutOfBoundsException ex) {
 				singleNodeOptions.setStyle(CB_ERROR_STYLE);
+			} catch(Exception ex) {
+				showAlertError(ex.getMessage());
 			}
 		});
 	}
@@ -175,14 +194,11 @@ public class GraphView extends BorderPane {
 					throw new IndexOutOfBoundsException("Select a node");
 				
 				List<NodeDisplay> dfsList = controller.dfs(singleNodeOptions.getSelectionModel().getSelectedIndex());
-				
-				// If no results, do nothing
-				if(dfsList == null)
-					return;
-				
-				animateColorTrans(dfsList, Color.BLACK, Color.BLUE);
+				animateColorTrans(dfsList, nodeColor, Color.DEEPSKYBLUE);
 			} catch(IndexOutOfBoundsException ex) {
 				singleNodeOptions.setStyle(CB_ERROR_STYLE);
+			} catch(Exception ex) {
+				showAlertError(ex.getMessage());
 			}
 		});
 	}
@@ -199,16 +215,12 @@ public class GraphView extends BorderPane {
 				List<NodeDisplay> shortestPath = controller.shortestPath(nodeStartOptions.getSelectionModel().getSelectedIndex(),
 																		nodeEndOptions.getSelectionModel().getSelectedIndex());
 				
-				animateColorTrans(shortestPath, Color.BLACK, Color.GREEN);
+				animateColorTrans(shortestPath, nodeColor, Color.GREENYELLOW);
 			} catch(IndexOutOfBoundsException ex) {
 				nodeStartOptions.setStyle(CB_ERROR_STYLE);
 				nodeEndOptions.setStyle(CB_ERROR_STYLE);
 			} catch(Exception ex) {
-				Alert alert = new Alert(AlertType.WARNING);
-				alert.setHeaderText(null);
-				alert.setContentText(ex.getMessage());
-				
-				alert.showAndWait();
+				showAlertError(ex.getMessage());
 			}
 		});
 	}
@@ -246,6 +258,14 @@ public class GraphView extends BorderPane {
 			
 			stageInfo.show();
 		});
+	}
+	
+	private void showAlertError(String message) {
+		Alert alert = new Alert(AlertType.WARNING);
+		alert.setHeaderText(null);
+		alert.setContentText(message);
+		
+		alert.showAndWait();
 	}
 	
 	private void setNodeListOptions(ObservableList<Node> nodes) {

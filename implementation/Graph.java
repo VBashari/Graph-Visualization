@@ -70,7 +70,6 @@ public class Graph<E extends Comparable<E>> {
 			return false;
 		
 		return getNeighbors(start).contains(end);
-//		return list.get(start).contains(new Edge<E>(start, end));
 	}
 	
 	public int getDegree(E node) {

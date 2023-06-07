@@ -1,0 +1,28 @@
+.button {
+	-fx-background-color: #FEFFFE;
+	-fx-border-color: #E9EBF8;
+}
+
+.combo-box {
+	-fx-background-color: #E9EBF8;
+}
+
+.text-field:focused {
+	-fx-focus-color: rgba(51, 101, 138, 0.5);
+}
+
+.menu-bar {
+	-fx-background-color: #E9EBF8;
+	-fx-border-color: transparent transparent #FEFFFE transparent;
+	-fx-border-width: 3;
+}
+
+.menu:hover, .menu-item:focused, .menu-item.hovered {
+	-fx-background-color: #33658A;
+}
+
+.menu-bar > .container > .menu-button:hover,
+.menu-bar > .container > .menu-button:focused,
+.menu-bar > .container > .menu-button:showing {
+	-fx-background-color: #33658A;
+}

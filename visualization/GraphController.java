@@ -40,6 +40,20 @@ public class GraphController {
 		return nodes.getChildrenUnmodifiable();
 	}
 	
+	public void setDirected() {
+		graph.setIsDirected(true);
+		
+		for(Node edge: edges.getChildren())
+			((EdgeDisplay) edge).setDirected();
+	}
+	
+	public void setUndirected() {
+		graph.setIsDirected(false);
+		
+		for(Node edge: edges.getChildren())
+			((EdgeDisplay) edge).setUndirected();
+	}
+	
 	public void addNode(String value) {
 		// Value validation
 		if(value.isBlank())
@@ -48,8 +62,6 @@ public class GraphController {
 		NodeDisplay node = new NodeDisplay(value);
 		
 		if(graph.addNode(node)) {
-			System.out.println(graph);
-			
 			nodes.getChildren().add(node);
 			node.relocate(rand.nextDouble() * node.getParent().getLayoutBounds().getMaxX(), rand.nextDouble() * node.getParent().getLayoutBounds().getMaxY());
 			
@@ -84,29 +96,39 @@ public class GraphController {
 			
 			if(graph.addEdge(start, end, weightValue)) {
 				if(!graph.isDirected())
-					addEdge(end, start, weightValue);
+					addEdge(end, start, weightValue, graph.isDirected());
 				
-				addEdge(start, end, weightValue);
+				addEdge(start, end, weightValue, graph.isDirected());
 			}
 		} catch(NumberFormatException ex) {
 			throw new IllegalArgumentException("Weight has to be of numeric value");
 		}
 	}
 	
-	public List<NodeDisplay> bfs(int nodeIndex) {
+	public List<NodeDisplay> bfs(int nodeIndex) throws Exception {
 		//	Value validation
 		if(nodeIndex < -1 || nodeIndex >= nodes.getChildren().size())
 			throw new IndexOutOfBoundsException("Out of bounds node value");
 		
-		return Collections.unmodifiableList(graph.bfs(((NodeDisplay) nodes.getChildren().get(nodeIndex))));
+		List<NodeDisplay> result = Collections.unmodifiableList(graph.bfs(((NodeDisplay) nodes.getChildren().get(nodeIndex))));
+		
+		if(result == null)
+			throw new Exception("No connection between the nodes");
+		
+		return result;
 	}
 	
-	public List<NodeDisplay> dfs(int nodeIndex) {
+	public List<NodeDisplay> dfs(int nodeIndex) throws Exception {
 		// Value validation
 		if(nodeIndex < -1 || nodeIndex >= nodes.getChildren().size())
 			throw new IndexOutOfBoundsException("Out of bounds node value");
 		
-		return Collections.unmodifiableList(graph.dfs(((NodeDisplay) nodes.getChildren().get(nodeIndex))));
+		List<NodeDisplay> result = Collections.unmodifiableList(graph.dfs(((NodeDisplay) nodes.getChildren().get(nodeIndex))));
+		
+		if(result == null)
+			throw new Exception("No connection between the nodes");
+		
+		return result;
 	}
 	
 	public List<NodeDisplay> shortestPath(int startNodeIndex, int endNodeIndex) throws Exception {
@@ -118,20 +140,25 @@ public class GraphController {
 		
 		try {
 			return Collections.unmodifiableList(graph.shortestPath((NodeDisplay) nodes.getChildren().get(startNodeIndex),
-																	(NodeDisplay) nodes.getChildren().get(endNodeIndex)));
-		} catch(Exception ex) {
+																						(NodeDisplay) nodes.getChildren().get(endNodeIndex)));
+		} catch(NullPointerException ex) {
+			throw new Exception("No connection between these nodes");
+		}catch(Exception ex) {
 			throw ex;
 		}
 	}
 	
-	private void addEdge(NodeDisplay start, NodeDisplay end, double weight) {
-		EdgeDisplay edge = new EdgeDisplay(start, end, weight);
+	private void addEdge(NodeDisplay start, NodeDisplay end, double weight, boolean isDirected) {
+		EdgeDisplay edge = new EdgeDisplay(start, end, weight, isDirected);
 			
 		// Remove edge by right-clicking on it
 		edge.setOnMouseClicked(e -> {
 			if(e.getButton() == MouseButton.SECONDARY) {
 				e.consume();
 				edges.getChildren().remove(edge);
+				
+				if(!graph.isDirected())
+					edges.getChildren().removeIf(x -> ((EdgeDisplay) x).getStartNode().equals(edge.getEndNode()) || ((EdgeDisplay) x).getEndNode().equals(edge.getStartNode()));
 			}
 		});
 			
